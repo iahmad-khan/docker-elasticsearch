@@ -29,3 +29,11 @@ beats_user:
         - "*"
     users:
         - beats
+
+monit_user:
+    backendroles:
+        - read_only
+    host:
+        - "*"
+    users:
+        - monit

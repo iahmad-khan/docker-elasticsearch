@@ -17,3 +17,8 @@ beats:
   hash: changeme #beats
   roles:
     - beats_user
+
+monit:
+  hash: changeme #monit
+  roles:
+    - read_only

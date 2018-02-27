@@ -41,3 +41,6 @@ searchguard:
         truststore_password: ${TS_PWD}
     authcz.admin_dn:
       - "CN=elastic ,OU=devops, C=COM"
+
+xpack.security.enabled: false
+xpack.ml.enabled: false

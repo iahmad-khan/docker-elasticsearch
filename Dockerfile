@@ -1,10 +1,10 @@
 FROM openjdk:8-jre-alpine
 
-MAINTAINER Guillaume Simonneau <simonneaug@gmail.com>
-LABEL Description="elasticsearch searchguard search-guard"
+MAINTAINER Ijaz Ahmad <ijazahmad722@gmail.com>
+LABEL Description="elasticsearch searchguard search-guard with xpack"
 
-ENV ES_VERSION 6.1.1
-ENV SG_VERSION "20.1"
+ENV ES_VERSION 6.1.3
+ENV SG_VERSION "6.1.3-21.0"
 ENV DOWNLOAD_URL "https://artifacts.elastic.co/downloads/elasticsearch"
 ENV ES_TARBAL "${DOWNLOAD_URL}/elasticsearch-${ES_VERSION}.tar.gz"
 ENV ES_TARBALL_ASC "${DOWNLOAD_URL}/elasticsearch-${ES_VERSION}.tar.gz.asc"
@@ -29,12 +29,14 @@ RUN apk add --no-cache -t .build-deps gnupg \
   && mv elasticsearch-$ES_VERSION /elasticsearch \
   && adduser -DH -s /sbin/nologin elasticsearch \
   && echo "===> Installing search-guard..." \
-  && /elasticsearch/bin/elasticsearch-plugin install -b "com.floragunn:search-guard-6:$ES_VERSION-$SG_VERSION" \
+  && /elasticsearch/bin/elasticsearch-plugin install -b "com.floragunn:search-guard-6:$SG_VERSION" \
+  && /elasticsearch/bin/elasticsearch-plugin install --batch x-pack \
+  && /elasticsearch/bin/elasticsearch-plugin install --batch ingest-geoip \
   && echo "===> Creating Elasticsearch Paths..." \
   && for path in \
-  	/elasticsearch/config \
-  	/elasticsearch/config/scripts \
-  	/elasticsearch/plugins \
+	/elasticsearch/config \
+	/elasticsearch/config/scripts \
+	/elasticsearch/plugins \
   ; do \
   mkdir -p "$path"; \
   chown -R elasticsearch:elasticsearch "$path"; \
@@ -43,7 +45,7 @@ RUN apk add --no-cache -t .build-deps gnupg \
   && rm /elasticsearch/config/elasticsearch.yml \
   && apk del --purge .build-deps
 
-
+RUN  rm -rf /elasticsearch/plugins/x-pack/platform/linux-x86_64 
 RUN  mkdir -p /.backup/elasticsearch/
 COPY config /.backup/elasticsearch/config
 
@@ -67,11 +69,12 @@ ENV CLUSTER_NAME="elasticsearch-default" \
     KIBANA_PWD="changeme" \
     LOGSTASH_PWD="changeme" \
     BEATS_PWD="changeme" \
+    MONIT_PWD="changeme" \
     HEAP_SIZE="1g" \
     CA_PWD="changeme" \
     TS_PWD="changeme" \
     KS_PWD="changeme" \
-		HTTP_SSL=true \
+    HTTP_SSL=true \
     LOG_LEVEL=INFO
 
 COPY ./src/ /run/
